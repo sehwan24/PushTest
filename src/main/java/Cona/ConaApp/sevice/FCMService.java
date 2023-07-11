@@ -4,12 +4,14 @@ import Cona.ConaApp.dto.FCMMessageDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -40,6 +42,12 @@ public class FCMService {
         log.info(response.body().string());
     }
 
+    @Scheduled(cron = "5 * * * * ?")
+    public void scheduledAlarm() throws FirebaseMessagingException, IOException {
+        log.info("Test");
+        sendMessageTo("eoMUbvsBR-eroyIjYWj48R:APA91bFFJCFp3Q_Qifel4VCIZDwN6WjEMpsf-rmhY6LFXqze_J5TmvJeIBzX90yIK7ZlAw225cnno3doylQjLO-ljMQd6sj6jFUIXyz6w5WvfTJbTM99VjO9H7lQ6r4sA9X2dBchIz4V", "Test", "Test");
+    }
+
     private String makeMessage(String targetToken, String title, String body) throws JsonProcessingException {
         FCMMessageDto fcmMessageDto = FCMMessageDto.builder()
                 .message(FCMMessageDto.Message.builder()
@@ -63,7 +71,10 @@ public class FCMService {
                 .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
                 .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
         googleCredentials.refreshIfExpired();
+        System.out.println("googleCredentials.getAccessToken().getTokenValue() = " + googleCredentials.getAccessToken().getTokenValue());
         return googleCredentials.getAccessToken().getTokenValue();
     }
+
+    
 
 }
